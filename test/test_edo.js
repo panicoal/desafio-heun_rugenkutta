@@ -53,3 +53,4 @@ if (sim.errorMaxRK4 >= sim.errorMaxHeun) {
 }
 
 console.log('\n🎉 ¡Todos los tests matemáticos pasaron exitosamente!');
+

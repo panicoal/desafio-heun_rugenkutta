@@ -1,21 +1,21 @@
 :root {
   --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', Menlo, monospace;
-  --bg-primary: #0f172a;
+  --bg-primary: #0b1120;
   --bg-secondary: #1e293b;
   --bg-card: #1e293b;
   --bg-card-hover: #273549;
   --bg-input: #0f172a;
   --border-color: #334155;
-  --border-focus: #3b82f6;
+  --border-focus: #38bdf8;
   --text-main: #f8fafc;
   --text-muted: #94a3b8;
   --text-dim: #64748b;
-  --color-primary: #3b82f6;
-  --color-primary-hover: #2563eb;
+  --color-primary: #38bdf8;
+  --color-primary-hover: #0284c7;
   --color-exact: #38bdf8;
   --color-heun: #10b981;
-  --color-rk4: #a855f7;
+  --color-rk4: #c084fc;
   --color-danger: #ef4444;
   --color-warning: #f59e0b;
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.25);
@@ -54,7 +54,7 @@ body {
   align-items: center;
   flex-wrap: wrap;
   gap: 1rem;
-  padding-bottom: 1.5rem;
+  padding-bottom: 1.25rem;
   border-bottom: 1px solid var(--border-color);
   margin-bottom: 1.5rem;
 }
@@ -67,16 +67,17 @@ body {
 
 .brand-icon {
   font-size: 2.25rem;
-  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+  background: linear-gradient(135deg, #0284c7 0%, #8b5cf6 100%);
   border-radius: var(--radius-md);
   padding: 0.35rem 0.6rem;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
 }
 
 .brand-title {
-  font-size: 1.45rem;
+  font-size: 1.4rem;
   font-weight: 700;
   letter-spacing: -0.02em;
 }
@@ -90,6 +91,7 @@ body {
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  flex-wrap: wrap;
 }
 
 .badge {
@@ -120,7 +122,7 @@ body {
 /* Grid Layout */
 .main-grid {
   display: grid;
-  grid-template-columns: 340px 1fr;
+  grid-template-columns: 350px 1fr;
   gap: 1.5rem;
   align-items: start;
 }
@@ -191,14 +193,14 @@ body {
 }
 
 .btn-preset:hover, .btn-preset.active {
-  background-color: rgba(59, 130, 246, 0.15);
+  background-color: rgba(56, 189, 248, 0.15);
   border-color: var(--color-primary);
   color: var(--text-main);
 }
 
-/* Form Controls */
+/* Form Controls & Tooltips */
 .form-group {
-  margin-bottom: 1rem;
+  margin-bottom: 1.1rem;
 }
 
 .form-label-row {
@@ -212,6 +214,20 @@ body {
   font-size: 0.825rem;
   font-weight: 500;
   color: var(--text-muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.tooltip-icon {
+  font-size: 0.75rem;
+  cursor: help;
+  color: var(--text-dim);
+  transition: color 0.15s;
+}
+
+.tooltip-icon:hover {
+  color: var(--color-primary);
 }
 
 .form-val-display {
@@ -236,7 +252,7 @@ body {
 .form-input:focus {
   outline: none;
   border-color: var(--border-focus);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
 }
 
 .slider-input {
@@ -267,14 +283,14 @@ body {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
   color: white;
-  box-shadow: 0 2px 4px rgba(37, 99, 235, 0.3);
+  box-shadow: 0 2px 4px rgba(2, 132, 199, 0.3);
 }
 
 .btn-primary:hover {
-  filter: brightness(1.1);
-  box-shadow: 0 4px 8px rgba(37, 99, 235, 0.4);
+  filter: brightness(1.15);
+  box-shadow: 0 4px 10px rgba(2, 132, 199, 0.4);
 }
 
 .btn-secondary {
@@ -307,7 +323,7 @@ body {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 1rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.25rem;
 }
 
 .kpi-card {
@@ -317,6 +333,7 @@ body {
   padding: 1rem;
   position: relative;
   overflow: hidden;
+  box-shadow: var(--shadow-sm);
 }
 
 .kpi-card::before {
@@ -343,7 +360,7 @@ body {
 }
 
 .kpi-value {
-  font-size: 1.5rem;
+  font-size: 1.45rem;
   font-weight: 700;
   font-family: var(--font-mono);
   color: var(--text-main);
@@ -355,31 +372,84 @@ body {
   margin-top: 0.25rem;
 }
 
-/* Chart Container */
+/* Card de Diagnóstico Operativo */
+.diagnostico-card {
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.95) 100%);
+  border: 1px solid var(--border-color);
+  border-left: 5px solid var(--color-primary);
+  border-radius: var(--radius-md);
+  padding: 1.15rem;
+  margin-bottom: 1.25rem;
+  box-shadow: var(--shadow-md);
+}
+
+.diagnostico-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.6rem;
+}
+
+.diagnostico-title {
+  font-size: 1rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.diagnostico-badge {
+  padding: 0.2rem 0.6rem;
+  border-radius: 9999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.diagnostico-body {
+  font-size: 0.875rem;
+  color: #cbd5e1;
+  line-height: 1.55;
+}
+
+.diagnostico-body p {
+  margin-bottom: 0.5rem;
+}
+
+.diagnostico-recs {
+  margin-top: 0.6rem;
+  padding-left: 1.2rem;
+  font-size: 0.825rem;
+  color: #94a3b8;
+}
+
+.diagnostico-recs li {
+  margin-bottom: 0.35rem;
+}
+
+/* Chart Container & Tabs */
 .chart-card {
   margin-bottom: 1.5rem;
 }
 
-.chart-header-actions {
+.chart-header-row {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 0.5rem;
-}
-
-.chart-wrapper {
-  position: relative;
-  width: 100%;
-  height: 380px;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
 }
 
 .chart-tabs {
   display: flex;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
+  gap: 0.4rem;
+  flex-wrap: wrap;
 }
 
 .tab-btn {
-  padding: 0.4rem 0.8rem;
+  padding: 0.45rem 0.85rem;
   font-size: 0.8rem;
   font-weight: 600;
   background-color: var(--bg-input);
@@ -390,10 +460,21 @@ body {
   transition: all 0.15s ease;
 }
 
+.tab-btn:hover {
+  background-color: var(--bg-card-hover);
+  color: var(--text-main);
+}
+
 .tab-btn.active {
-  background-color: var(--color-primary);
+  background-color: rgba(56, 189, 248, 0.18);
   border-color: var(--color-primary);
-  color: white;
+  color: var(--color-primary);
+}
+
+.chart-wrapper {
+  position: relative;
+  width: 100%;
+  height: 400px;
 }
 
 /* Table */
@@ -424,6 +505,7 @@ body {
   top: 0;
   border-bottom: 1px solid var(--border-color);
   font-weight: 600;
+  z-index: 10;
 }
 
 .edo-table td {
@@ -431,8 +513,17 @@ body {
   border-bottom: 1px solid rgba(255, 255, 255, 0.04);
 }
 
+.edo-table tr {
+  cursor: pointer;
+  transition: background-color 0.1s ease;
+}
+
 .edo-table tr:hover {
   background-color: var(--bg-card-hover);
+}
+
+.edo-table tr.fila-cruce {
+  background-color: rgba(239, 68, 68, 0.15) !important;
 }
 
 .edo-table th:first-child, .edo-table td:first-child {
@@ -443,6 +534,147 @@ body {
 .col-heun { color: var(--color-heun); }
 .col-rk4 { color: var(--color-rk4); }
 .col-err { color: #f87171; font-size: 0.78rem; }
+
+/* Modal Inspector de Paso */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(11, 17, 32, 0.8);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.modal-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.modal-box {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  max-width: 650px;
+  width: 90%;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+  padding: 1.5rem;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.modal-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.btn-close-modal {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.25rem;
+  cursor: pointer;
+  padding: 0.2rem 0.5rem;
+}
+
+.btn-close-modal:hover {
+  color: var(--text-main);
+}
+
+.step-calc-box {
+  background-color: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 0.85rem;
+  margin-bottom: 1rem;
+  font-family: var(--font-mono);
+  font-size: 0.825rem;
+}
+
+.step-calc-title {
+  font-weight: bold;
+  font-size: 0.85rem;
+  margin-bottom: 0.4rem;
+  color: var(--color-primary);
+}
+
+/* Sección Teórica Colapsable */
+.theory-accordion {
+  margin-bottom: 1.5rem;
+}
+
+.theory-toggle-btn {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  padding: 0.9rem 1.25rem;
+  border-radius: var(--radius-lg);
+  color: var(--text-main);
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.theory-toggle-btn:hover {
+  background-color: var(--bg-card-hover);
+  border-color: var(--color-primary);
+}
+
+.theory-content {
+  display: none;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-top: none;
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  padding: 1.5rem;
+  font-size: 0.9rem;
+  color: #cbd5e1;
+  line-height: 1.65;
+}
+
+.theory-content.open {
+  display: block;
+}
+
+.theory-section {
+  margin-bottom: 1.5rem;
+}
+
+.theory-section h4 {
+  font-size: 1rem;
+  color: var(--color-primary);
+  margin-bottom: 0.5rem;
+}
+
+.theory-formula-box {
+  background-color: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  margin: 0.75rem 0;
+  overflow-x: auto;
+  text-align: center;
+}
 
 /* History Section */
 .history-list {
@@ -503,7 +735,7 @@ body {
   transform: translateY(100px);
   opacity: 0;
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  z-index: 100;
+  z-index: 2000;
 }
 
 .toast.show {
@@ -524,10 +756,10 @@ body {
   .main-grid {
     display: block !important;
   }
-  .sidebar-controls, .action-buttons, .presets-group, .chart-tabs, .header-badges, .btn, .history-actions {
+  .sidebar-controls, .action-buttons, .presets-group, .chart-tabs, .header-badges, .btn, .history-actions, .theory-accordion, .btn-close-modal, .modal-overlay {
     display: none !important;
   }
-  .card {
+  .card, .diagnostico-card {
     border: 1px solid #ccc !important;
     box-shadow: none !important;
     background: transparent !important;

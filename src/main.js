@@ -1,6 +1,7 @@
 import './style.css';
 import { simularEDO } from './edo.js';
-import { renderGraficoPoblacion, renderGraficoError } from './chart.js';
+import { renderGraficoPoblacion, renderGraficoError, renderGraficoComparativa } from './chart.js';
+import { renderAllMath } from './math_render.js';
 import {
   initDB,
   guardarSimulacion,
@@ -13,7 +14,7 @@ import { exportarCSV, imprimirReporte } from './export.js';
 
 // Estado global de la aplicación
 let simActual = null;
-let tabActiva = 'poblacion'; // 'poblacion' | 'error'
+let tabActiva = 'poblacion'; // 'poblacion' | 'error' | 'comparativa'
 
 // Elementos DOM
 const form = document.getElementById('edoForm');
@@ -40,6 +41,14 @@ const valT = document.getElementById('valT');
 const selectH = document.getElementById('selectH');
 const valH = document.getElementById('valH');
 
+// Diagnóstico
+const cardDiagnostico = document.getElementById('cardDiagnostico');
+const diagTitulo = document.getElementById('diagTitulo');
+const diagBadge = document.getElementById('diagBadge');
+const diagResumen = document.getElementById('diagResumen');
+const diagDetalle = document.getElementById('diagDetalle');
+const diagRecomendaciones = document.getElementById('diagRecomendaciones');
+
 // KPIs
 const kpiPobFinal = document.getElementById('kpiPobFinal');
 const kpiEquilibrio = document.getElementById('kpiEquilibrio');
@@ -54,6 +63,7 @@ const kpiRmseRK4 = document.getElementById('kpiRmseRK4');
 const chartCanvas = document.getElementById('chartCanvas');
 const tabPoblacion = document.getElementById('tabPoblacion');
 const tabError = document.getElementById('tabError');
+const tabComparativa = document.getElementById('tabComparativa');
 const errorScaleToggle = document.getElementById('errorScaleToggle');
 const checkEscalaLog = document.getElementById('checkEscalaLog');
 
@@ -77,6 +87,18 @@ const presetBase = document.getElementById('presetBase');
 const presetSaturacion = document.getElementById('presetSaturacion');
 const presetAdopcion = document.getElementById('presetAdopcion');
 const presetPasoFino = document.getElementById('presetPasoFino');
+
+// Modal Inspector
+const modalInspector = document.getElementById('modalInspector');
+const modalInspectorTitulo = document.getElementById('modalInspectorTitulo');
+const modalInspectorContenido = document.getElementById('modalInspectorContenido');
+const btnCerrarModal = document.getElementById('btnCerrarModal');
+
+// Sección Teórica
+const btnToggleTeoria = document.getElementById('btnToggleTeoria');
+const theoryContent = document.getElementById('theoryContent');
+const theoryToggleIcon = document.getElementById('theoryToggleIcon');
+const btnVerTeoriaTop = document.getElementById('btnVerTeoriaTop');
 
 // Toast
 const appToast = document.getElementById('appToast');
@@ -161,34 +183,133 @@ function actualizarGrafica() {
   if (tabActiva === 'poblacion') {
     errorScaleToggle.style.display = 'none';
     renderGraficoPoblacion(chartCanvas, simActual);
-  } else {
+  } else if (tabActiva === 'error') {
     errorScaleToggle.style.display = 'flex';
     renderGraficoError(chartCanvas, simActual, checkEscalaLog.checked);
+  } else if (tabActiva === 'comparativa') {
+    errorScaleToggle.style.display = 'none';
+    renderGraficoComparativa(chartCanvas, simActual);
   }
+}
+
+/**
+ * Actualiza el panel de Diagnóstico Operativo
+ */
+function actualizarDiagnostico(diag) {
+  cardDiagnostico.style.borderLeftColor = diag.color;
+  diagTitulo.innerHTML = `<span>🩺</span> ${diag.titulo}`;
+  diagBadge.textContent = diag.badge;
+  diagBadge.style.backgroundColor = `${diag.color}22`;
+  diagBadge.style.color = diag.color;
+  diagBadge.style.border = `1px solid ${diag.color}44`;
+
+  diagResumen.innerHTML = `<strong>${diag.resumen}</strong>`;
+  diagDetalle.textContent = diag.detalle;
+
+  diagRecomendaciones.innerHTML = '';
+  diag.recomendaciones.forEach(rec => {
+    const li = document.createElement('li');
+    li.textContent = rec;
+    diagRecomendaciones.appendChild(li);
+  });
 }
 
 /**
  * Actualiza la tabla paso a paso
  */
-function actualizarTabla(pasos) {
+function actualizarTabla(pasos, tCruce) {
   tableTotalSteps.textContent = `${pasos.length} pasos calculados`;
   tablaBody.innerHTML = '';
 
   const fragment = document.createDocumentFragment();
-  pasos.forEach((p) => {
+  pasos.forEach((p, idx) => {
     const tr = document.createElement('tr');
+    tr.setAttribute('data-paso-idx', idx);
+
+    // Resaltar el paso inmediato donde ocurre el cruce
+    const esCruce = tCruce !== null && p.t >= tCruce && (idx === 0 || pasos[idx - 1].t < tCruce);
+    if (esCruce) {
+      tr.classList.add('fila-cruce');
+    }
+
     tr.innerHTML = `
-      <td>${p.paso}</td>
+      <td>${p.paso} ${esCruce ? '⚠️' : ''}</td>
       <td><strong>${p.t}</strong></td>
       <td class="col-exact">${p.analitica.toFixed(4)}</td>
       <td class="col-heun">${p.heun.toFixed(4)}</td>
       <td class="col-err">${p.errorHeun.toExponential(3)}</td>
       <td class="col-rk4">${p.rk4.toFixed(4)}</td>
       <td class="col-err">${p.errorRK4.toExponential(3)}</td>
+      <td style="text-align: center;">
+        <button type="button" class="btn btn-secondary" style="padding: 0.2rem 0.45rem; font-size: 0.72rem;" title="Inspeccionar paso">
+          🔍
+        </button>
+      </td>
     `;
     fragment.appendChild(tr);
   });
   tablaBody.appendChild(fragment);
+}
+
+/**
+ * Abre modal con desglose detallado de cálculo del paso
+ */
+function abrirInspectorPaso(pasoIdx) {
+  if (!simActual || !simActual.pasos[pasoIdx]) return;
+  const paso = simActual.pasos[pasoIdx];
+  const params = simActual.parametros;
+
+  modalInspectorTitulo.innerHTML = `🔍 Inspección Matemática: Paso #${paso.paso} (t = ${paso.t} meses)`;
+
+  let contenido = `
+    <div class="step-calc-box">
+      <div class="step-calc-title">📌 Estado al Inicio del Intervalo:</div>
+      <div>• Tiempo actual: <code>t_${paso.paso} = ${paso.t}</code> meses</div>
+      <div>• Solución Exacta: <code>y(${paso.t}) = ${paso.analitica.toFixed(6)}</code></div>
+      <div>• EDO evaluada: <code>f(t, y) = a - b·y = ${params.a} - ${params.b}·y</code></div>
+    </div>
+  `;
+
+  if (paso.infoHeun) {
+    const h = paso.infoHeun;
+    contenido += `
+      <div class="step-calc-box">
+        <div class="step-calc-title" style="color: #10b981;">⚡ Método de Heun (RK2 - Predictor Corrector):</div>
+        <div>1. Pendiente inicial: <code>k₁ = f(${paso.t}, ${paso.heun.toFixed(4)}) = ${h.k1.toFixed(5)}</code></div>
+        <div>2. Predictor Euler: <code>y~_${paso.paso + 1} = ${paso.heun.toFixed(4)} + ${params.h}·(${h.k1.toFixed(5)}) = ${h.yPred.toFixed(5)}</code></div>
+        <div>3. Pendiente final: <code>k₂ = f(${Number((paso.t + params.h).toFixed(4))}, ${h.yPred.toFixed(4)}) = ${h.k2.toFixed(5)}</code></div>
+        <div>4. Corrector: <code>y_${paso.paso + 1} = ${paso.heun.toFixed(4)} + (${params.h}/2)·(${h.k1.toFixed(4)} + ${h.k2.toFixed(4)}) = ${h.ySiguiente.toFixed(6)}</code></div>
+        <div style="margin-top: 0.35rem; color: #f87171;">• Error Absoluto Heun: <code>${paso.errorHeun.toExponential(4)}</code> (Relativo: ${paso.relErrorHeun.toFixed(3)}%)</div>
+      </div>
+    `;
+  }
+
+  if (paso.infoRK4) {
+    const r = paso.infoRK4;
+    contenido += `
+      <div class="step-calc-box">
+        <div class="step-calc-title" style="color: #c084fc;">🚀 Runge-Kutta de 4to Orden (RK4):</div>
+        <div>1. <code>k₁ = f(t_n, y_n) = ${r.k1.toFixed(5)}</code></div>
+        <div>2. <code>k₂ = f(t_n + h/2, y_n + h/2·k₁) = ${r.k2.toFixed(5)}</code></div>
+        <div>3. <code>k₃ = f(t_n + h/2, y_n + h/2·k₂) = ${r.k3.toFixed(5)}</code></div>
+        <div>4. <code>k₄ = f(t_n + h, y_n + h·k₃) = ${r.k4.toFixed(5)}</code></div>
+        <div>5. Promedio RK4: <code>y_${paso.paso + 1} = y_n + (h/6)·(k₁ + 2k₂ + 2k₃ + k₄) = ${r.ySiguiente.toFixed(6)}</code></div>
+        <div style="margin-top: 0.35rem; color: #f87171;">• Error Absoluto RK4: <code>${paso.errorRK4.toExponential(4)}</code> (Relativo: ${paso.relErrorRK4.toFixed(5)}%)</div>
+      </div>
+    `;
+  }
+
+  if (paso.errorRK4 > 0) {
+    const factorPaso = paso.errorHeun / paso.errorRK4;
+    contenido += `
+      <div style="font-size: 0.8rem; color: #38bdf8; background: rgba(56, 189, 248, 0.1); padding: 0.6rem; border-radius: 6px;">
+        💡 En este paso, RK4 es <strong>${factorPaso < 1e5 ? factorPaso.toFixed(1) : factorPaso.toExponential(1)} veces más exacto</strong> que Heun debido a su orden de convergencia O(h⁴).
+      </div>
+    `;
+  }
+
+  modalInspectorContenido.innerHTML = contenido;
+  modalInspector.classList.add('active');
 }
 
 /**
@@ -205,7 +326,7 @@ function actualizarKPIs(sim) {
     kpiEstadoCruce.innerHTML = `<span style="color: #ef4444; font-weight: 600;">⚠️ Capacidad (${parametros.C}) superada</span>`;
   } else if (tCruce !== null) {
     kpiTiempoCruce.textContent = `t = ${tCruce.toFixed(2)} meses`;
-    kpiEstadoCruce.innerHTML = `<span style="color: #10b981;">Seguro en T=${parametros.T} (supera en t>${tCruce.toFixed(1)})</span>`;
+    kpiEstadoCruce.innerHTML = `<span style="color: #f59e0b;">Seguro en T=${parametros.T} (supera en t>${tCruce.toFixed(1)})</span>`;
   } else {
     kpiTiempoCruce.textContent = 'No cruza';
     kpiEstadoCruce.innerHTML = `<span style="color: #10b981;">✅ Por debajo del límite</span>`;
@@ -225,9 +346,10 @@ function ejecutarSimulacion() {
   const params = obtenerParametros();
   simActual = simularEDO(params);
 
+  actualizarDiagnostico(simActual.diagnostico);
   actualizarKPIs(simActual);
   actualizarGrafica();
-  actualizarTabla(simActual.pasos);
+  actualizarTabla(simActual.pasos, simActual.tCruce);
 }
 
 /**
@@ -277,9 +399,28 @@ async function refrescarHistorial() {
 }
 
 /**
+ * Alterna el acordeón del Marco Teórico
+ */
+function toggleTeoria(abrir = null) {
+  const estaAbierto = theoryContent.classList.contains('open');
+  const forzar = abrir !== null ? abrir : !estaAbierto;
+
+  if (forzar) {
+    theoryContent.classList.add('open');
+    theoryToggleIcon.textContent = '▲ Plegar';
+  } else {
+    theoryContent.classList.remove('open');
+    theoryToggleIcon.textContent = '▼ Desplegar';
+  }
+}
+
+/**
  * Inicialización de la aplicación
  */
 async function bootstrap() {
+  // Renderizar fórmulas LaTeX en UI
+  renderAllMath();
+
   // 1. Conectar inputs sincronizados
   bindRangeAndInput(rangeY0, inputY0, valY0, ejecutarSimulacion);
   bindRangeAndInput(rangeA, inputA, valA, ejecutarSimulacion);
@@ -303,6 +444,7 @@ async function bootstrap() {
     tabActiva = 'poblacion';
     tabPoblacion.classList.add('active');
     tabError.classList.remove('active');
+    tabComparativa.classList.remove('active');
     actualizarGrafica();
   });
 
@@ -310,6 +452,15 @@ async function bootstrap() {
     tabActiva = 'error';
     tabError.classList.add('active');
     tabPoblacion.classList.remove('active');
+    tabComparativa.classList.remove('active');
+    actualizarGrafica();
+  });
+
+  tabComparativa.addEventListener('click', () => {
+    tabActiva = 'comparativa';
+    tabComparativa.classList.add('active');
+    tabPoblacion.classList.remove('active');
+    tabError.classList.remove('active');
     actualizarGrafica();
   });
 
@@ -337,7 +488,34 @@ async function bootstrap() {
     });
   });
 
-  // 4. Exportaciones
+  // 4. Modal Inspector de Pasos
+  tablaBody.addEventListener('click', (e) => {
+    const tr = e.target.closest('tr');
+    if (!tr) return;
+    const idx = parseInt(tr.getAttribute('data-paso-idx'), 10);
+    if (!isNaN(idx)) {
+      abrirInspectorPaso(idx);
+    }
+  });
+
+  btnCerrarModal.addEventListener('click', () => {
+    modalInspector.classList.remove('active');
+  });
+
+  modalInspector.addEventListener('click', (e) => {
+    if (e.target === modalInspector) {
+      modalInspector.classList.remove('active');
+    }
+  });
+
+  // 5. Marco Teórico Acordeón
+  btnToggleTeoria.addEventListener('click', () => toggleTeoria());
+  btnVerTeoriaTop.addEventListener('click', () => {
+    toggleTeoria(true);
+    document.getElementById('teoriaSection').scrollIntoView({ behavior: 'smooth' });
+  });
+
+  // 6. Exportaciones
   btnExportarCSV.addEventListener('click', () => {
     if (!simActual) return;
     const nombre = `simulacion_edo_y0-${simActual.parametros.y0}_a-${simActual.parametros.a}_h-${simActual.parametros.h}.csv`;
@@ -349,12 +527,12 @@ async function bootstrap() {
     imprimirReporte();
   });
 
-  // 5. Historial PGlite: Acciones
+  // 7. Historial PGlite: Acciones
   btnGuardar.addEventListener('click', async () => {
     if (!simActual) return;
     try {
       const nombre = prompt('Nombre para identificar esta simulación:', `Simulación ${new Date().toLocaleTimeString()}`);
-      if (nombre === null) return; // Cancelado
+      if (nombre === null) return;
 
       await guardarSimulacion(nombre, simActual);
       showToast('Simulación guardada en PostgreSQL (PGlite)', '💾');
@@ -403,7 +581,7 @@ async function bootstrap() {
     }
   });
 
-  // 6. Inicializar PGlite
+  // 8. Inicializar PGlite
   try {
     const { isPersisted } = await initDB();
     if (isPersisted) {
@@ -418,7 +596,7 @@ async function bootstrap() {
     pgliteStatusBadge.style.borderColor = '#ef4444';
   }
 
-  // 7. Simulación inicial automática
+  // 9. Simulación inicial automática
   ejecutarSimulacion();
 }
 

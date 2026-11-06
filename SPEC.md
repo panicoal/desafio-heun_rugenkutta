@@ -138,3 +138,4 @@ CREATE TABLE IF NOT EXISTS simulaciones (
   })
   ```
 - Salida de producción estática en `dist/` compatible 100% con Vercel.
+

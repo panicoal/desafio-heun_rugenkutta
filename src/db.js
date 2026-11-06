@@ -144,3 +144,4 @@ export async function vaciarHistorial() {
   const { db } = await initDB();
   await db.query(`TRUNCATE TABLE simulaciones;`);
 }
+

@@ -15,10 +15,13 @@
         <div class="brand-icon">🐾</div>
         <div>
           <h1 class="brand-title">Simulador EDO: Albergue de Mascotas</h1>
-          <p class="brand-subtitle">Análisis Numérico: Heun (RK2) vs Runge-Kutta 4to Orden (RK4) vs Solución Exacta</p>
+          <p class="brand-subtitle">Comparativa Numérica Rigurosa: Heun (RK2) vs Runge-Kutta 4to Orden (RK4) vs Solución Exacta</p>
         </div>
       </div>
       <div class="header-badges">
+        <button type="button" class="btn btn-secondary" style="padding: 0.35rem 0.75rem; font-size: 0.75rem;" id="btnVerTeoriaTop">
+          📖 Marco Teórico y Fórmulas
+        </button>
         <div class="badge badge-pglite" id="pgliteStatusBadge">
           <span class="badge-status-dot"></span>
           <span id="pgliteStatusText">PGlite (IndexedDB) Activo</span>
@@ -40,12 +43,12 @@
 
           <!-- Presets -->
           <div class="presets-group">
-            <div class="presets-label">Escenarios Rápidos:</div>
+            <div class="presets-label">Escenarios Predefinidos:</div>
             <div class="presets-buttons">
-              <button type="button" class="btn-preset active" id="presetBase">Caso Base (Doc)</button>
-              <button type="button" class="btn-preset" id="presetSaturacion">Saturación Rápida</button>
-              <button type="button" class="btn-preset" id="presetAdopcion">Alta Adopción</button>
-              <button type="button" class="btn-preset" id="presetPasoFino">Paso Fino (h=0.1)</button>
+              <button type="button" class="btn-preset active" id="presetBase" title="y0=40, a=20, b=0.25, C=60, T=12, h=0.5">Caso Base (Doc)</button>
+              <button type="button" class="btn-preset" id="presetSaturacion" title="y0=20, a=35, b=0.2, C=60, T=12, h=0.5">Saturación Rápida</button>
+              <button type="button" class="btn-preset" id="presetAdopcion" title="y0=55, a=10, b=0.4, C=60, T=12, h=0.5">Alta Adopción</button>
+              <button type="button" class="btn-preset" id="presetPasoFino" title="y0=40, a=20, b=0.25, C=60, T=12, h=0.1">Paso Fino (h=0.1)</button>
             </div>
           </div>
 
@@ -53,7 +56,10 @@
             <!-- y0: Población Inicial -->
             <div class="form-group">
               <div class="form-label-row">
-                <label for="inputY0" class="form-label">Población Inicial (y₀):</label>
+                <label for="inputY0" class="form-label">
+                  Población Inicial (y₀):
+                  <span class="tooltip-icon" title="Cantidad de mascotas albergadas al inicio del estudio (t=0).">ℹ️</span>
+                </label>
                 <span class="form-val-display" id="valY0">40</span>
               </div>
               <input type="range" id="rangeY0" min="0" max="150" step="1" value="40" class="slider-input" />
@@ -63,7 +69,10 @@
             <!-- a: Tasa de Ingreso -->
             <div class="form-group">
               <div class="form-label-row">
-                <label for="inputA" class="form-label">Tasa Ingreso (a) [mascotas/mes]:</label>
+                <label for="inputA" class="form-label">
+                  Tasa Ingreso (a) [mascotas/mes]:
+                  <span class="tooltip-icon" title="Tasa constante de animales rescatados o ingresados por mes.">ℹ️</span>
+                </label>
                 <span class="form-val-display" id="valA">20</span>
               </div>
               <input type="range" id="rangeA" min="1" max="100" step="0.5" value="20" class="slider-input" />
@@ -73,7 +82,10 @@
             <!-- b: Tasa de Salida -->
             <div class="form-group">
               <div class="form-label-row">
-                <label for="inputB" class="form-label">Tasa Salida (b) [mes⁻¹]:</label>
+                <label for="inputB" class="form-label">
+                  Tasa Salida / Adopción (b) [mes⁻¹]:
+                  <span class="tooltip-icon" title="Tasa proporcional de salidas (adopciones) por cada animal presente.">ℹ️</span>
+                </label>
                 <span class="form-val-display" id="valB">0.25</span>
               </div>
               <input type="range" id="rangeB" min="0.01" max="1.5" step="0.01" value="0.25" class="slider-input" />
@@ -83,7 +95,10 @@
             <!-- C: Capacidad Máxima -->
             <div class="form-group">
               <div class="form-label-row">
-                <label for="inputC" class="form-label">Capacidad Máxima (C):</label>
+                <label for="inputC" class="form-label">
+                  Capacidad Máxima (C) [plazas]:
+                  <span class="tooltip-icon" title="Límite físico de jaulas y recursos en el albergue. Si y > C hay sobrecupo.">ℹ️</span>
+                </label>
                 <span class="form-val-display" id="valC">60</span>
               </div>
               <input type="range" id="rangeC" min="10" max="200" step="1" value="60" class="slider-input" />
@@ -93,7 +108,10 @@
             <!-- T: Tiempo Total -->
             <div class="form-group">
               <div class="form-label-row">
-                <label for="inputT" class="form-label">Tiempo Total (T) [meses]:</label>
+                <label for="inputT" class="form-label">
+                  Horizonte Temporal (T) [meses]:
+                  <span class="tooltip-icon" title="Duración total del estudio o proyección temporal.">ℹ️</span>
+                </label>
                 <span class="form-val-display" id="valT">12</span>
               </div>
               <input type="range" id="rangeT" min="1" max="36" step="1" value="12" class="slider-input" />
@@ -103,15 +121,18 @@
             <!-- h: Paso de Integración -->
             <div class="form-group">
               <div class="form-label-row">
-                <label for="inputH" class="form-label">Paso Integración (h):</label>
+                <label for="selectH" class="form-label">
+                  Paso de Integración (h = Δt):
+                  <span class="tooltip-icon" title="Tamaño del salto temporal. Valores pequeños aumentan la precisión pero requieren más pasos.">ℹ️</span>
+                </label>
                 <span class="form-val-display" id="valH">0.5</span>
               </div>
               <select id="selectH" class="form-input">
                 <option value="1.0">h = 1.0 (Paso Grueso)</option>
-                <option value="0.5" selected>h = 0.5 (Recomendado)</option>
-                <option value="0.25">h = 0.25 (Alta resolución)</option>
-                <option value="0.1">h = 0.1 (Fina resolución)</option>
-                <option value="0.05">h = 0.05 (Ultra fina)</option>
+                <option value="0.5" selected>h = 0.5 (Paso Estándar)</option>
+                <option value="0.25">h = 0.25 (Alta Resolución)</option>
+                <option value="0.1">h = 0.1 (Fina Resolución)</option>
+                <option value="0.05">h = 0.05 (Ultra Fina)</option>
               </select>
             </div>
 
@@ -134,8 +155,30 @@
         </div>
       </aside>
 
-      <!-- Columna Derecha: KPIs, Gráficas y Tabla de Resultados -->
+      <!-- Columna Derecha: Diagnóstico, KPIs, Gráficas y Tabla de Resultados -->
       <section class="content-display">
+        <!-- Card de Diagnóstico Operativo -->
+        <div class="diagnostico-card" id="cardDiagnostico">
+          <div class="diagnostico-header">
+            <h3 class="diagnostico-title" id="diagTitulo">
+              <span>🩺</span> Diagnóstico de Gestión del Albergue
+            </h3>
+            <span class="diagnostico-badge" id="diagBadge" style="background-color: rgba(239, 68, 68, 0.2); color: #f87171;">
+              Evaluando...
+            </span>
+          </div>
+          <div class="diagnostico-body">
+            <p id="diagResumen">Calculando indicadores poblacionales...</p>
+            <p id="diagDetalle" style="font-size: 0.825rem; color: #94a3b8;"></p>
+            <div style="font-weight: 600; font-size: 0.825rem; color: #e2e8f0; margin-top: 0.4rem;">
+              💡 Recomendaciones Cuantitativas:
+            </div>
+            <ul class="diagnostico-recs" id="diagRecomendaciones">
+              <!-- Inyectado dinámicamente -->
+            </ul>
+          </div>
+        </div>
+
         <!-- KPIs -->
         <div class="kpi-grid">
           <div class="kpi-card exact">
@@ -163,16 +206,17 @@
           </div>
         </div>
 
-        <!-- Gráfico -->
+        <!-- Visualizaciones Gráficas (3 Pestañas) -->
         <div class="card chart-card">
-          <div class="card-header">
+          <div class="chart-header-row">
             <div class="chart-tabs">
-              <button type="button" class="tab-btn active" id="tabPoblacion">📈 Curva de Población y(t)</button>
-              <button type="button" class="tab-btn" id="tabError">🎯 Comparativa de Errores E(t)</button>
+              <button type="button" class="tab-btn active" id="tabPoblacion">📈 Dinámica Poblacional y(t)</button>
+              <button type="button" class="tab-btn" id="tabError">🎯 Evolución del Error E(t)</button>
+              <button type="button" class="tab-btn" id="tabComparativa">📊 Precisión: Heun vs RK4</button>
             </div>
             <div class="chart-header-actions" id="errorScaleToggle" style="display: none;">
               <label style="font-size: 0.75rem; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; gap: 0.35rem;">
-                <input type="checkbox" id="checkEscalaLog" /> Escala Logarítmica
+                <input type="checkbox" id="checkEscalaLog" /> Escala Logarítmica (log₁₀)
               </label>
             </div>
           </div>
@@ -181,10 +225,75 @@
           </div>
         </div>
 
+        <!-- Acordeón Marco Teórico y Deducciones Fórmulas -->
+        <div class="theory-accordion" id="teoriaSection">
+          <button type="button" class="theory-toggle-btn" id="btnToggleTeoria">
+            <span>📚 Fundamentos Teóricos, Deducciones Matemáticas y Métodos Numéricos</span>
+            <span id="theoryToggleIcon">▼ Desplegar</span>
+          </button>
+          <div class="theory-content" id="theoryContent">
+            <!-- 1. Modelo EDO -->
+            <div class="theory-section">
+              <h4>1. Dinámica Poblacional del Albergue (Modelo EDO)</h4>
+              <p>
+                La evolución temporal del número de mascotas <span data-katex="y(t)"></span> se rige por un balance de masa:
+              </p>
+              <div class="theory-formula-box" data-katex="\frac{dy}{dt} = \text{Tasa Ingreso} - \text{Tasa Salida} = a - b y(t), \quad y(0) = y_0" data-display="true"></div>
+              <p>
+                Donde <span data-katex="a"></span> es el ingreso continuo mensual de nuevos animales y <span data-katex="b"></span> es la tasa proporcional de egreso por adopciones. Si la tasa neta se anula (<span data-katex="dy/dt = 0"></span>), se alcanza el equilibrio asintótico <span data-katex="y_\infty = \frac{a}{b}"></span>.
+              </p>
+            </div>
+
+            <!-- 2. Solución Analítica -->
+            <div class="theory-section">
+              <h4>2. Deducción de la Solución Analítica Exacta</h4>
+              <p>
+                Reescribiendo como ecuación lineal de primer orden: <span data-katex="y' + b y = a"></span>. Multiplicando por el factor integrante <span data-katex="\mu(t) = e^{\int b dt} = e^{bt}"></span>:
+              </p>
+              <div class="theory-formula-box" data-katex="\frac{d}{dt}\left(y \cdot e^{bt}\right) = a \cdot e^{bt} \implies y(t) e^{bt} = \frac{a}{b}e^{bt} + K" data-display="true"></div>
+              <p>
+                Evaluando en la condición inicial <span data-katex="y(0) = y_0 \implies K = y_0 - \frac{a}{b}"></span>, obtenemos la fórmula analítica exacta:
+              </p>
+              <div class="theory-formula-box" data-katex="y(t) = \frac{a}{b} + \left(y_0 - \frac{a}{b}\right)e^{-bt}" data-display="true"></div>
+            </div>
+
+            <!-- 3. Cruce de Capacidad -->
+            <div class="theory-section">
+              <h4>3. Cálculo Analítico del Tiempo de Cruce de Capacidad (<span data-katex="t_C"></span>)</h4>
+              <p>
+                Igualando la solución exacta a la capacidad máxima <span data-katex="y(t_C) = C"></span>:
+              </p>
+              <div class="theory-formula-box" data-katex="C = \frac{a}{b} + \left(y_0 - \frac{a}{b}\right)e^{-bt_C} \implies t_C = -\frac{1}{b}\ln\left(\frac{\frac{a}{b} - C}{\frac{a}{b} - y_0}\right)" data-display="true"></div>
+              <p>
+                Si el argumento del logaritmo es negativo o cero, la curva no intersecta la capacidad en tiempo futuro positivo.
+              </p>
+            </div>
+
+            <!-- 4. Métodos Numéricos -->
+            <div class="theory-section">
+              <h4>4. Comparación de Métodos Numéricos</h4>
+              <p>
+                <strong>A. Método de Heun (RK2 - Predictor-Corrector):</strong> Posee un error local de orden <span data-katex="O(h^3)"></span> y un error global acumulado de orden <span data-katex="O(h^2)"></span>.
+              </p>
+              <div class="theory-formula-box" data-katex="\begin{aligned} k_1 &= f(t_n, y_n) = a - b y_n \\ \tilde{y}_{n+1} &= y_n + h k_1 \quad \text{(Predictor de Euler)} \\ k_2 &= f(t_n + h, \tilde{y}_{n+1}) = a - b \tilde{y}_{n+1} \\ y_{n+1} &= y_n + \frac{h}{2}(k_1 + k_2) \quad \text{(Corrector)} \end{aligned}" data-display="true"></div>
+
+              <p style="margin-top: 1rem;">
+                <strong>B. Método de Runge-Kutta 4to Orden (RK4):</strong> Es un método de un solo paso de alta precisión, con error local de orden <span data-katex="O(h^5)"></span> y error global acumulado de orden <span data-katex="O(h^4)"></span>.
+              </p>
+              <div class="theory-formula-box" data-katex="\begin{aligned} k_1 &= f(t_n, y_n) \\ k_2 &= f(t_n + \tfrac{h}{2}, y_n + \tfrac{h}{2}k_1) \\ k_3 &= f(t_n + \tfrac{h}{2}, y_n + \tfrac{h}{2}k_2) \\ k_4 &= f(t_n + h, y_n + h k_3) \\ y_{n+1} &= y_n + \frac{h}{6}(k_1 + 2k_2 + 2k_3 + k_4) \end{aligned}" data-display="true"></div>
+            </div>
+          </div>
+        </div>
+
         <!-- Tabla Paso a Paso -->
         <div class="card table-card">
           <div class="card-header">
-            <h3 class="card-title">📋 Registro Paso a Paso de Métodos</h3>
+            <div>
+              <h3 class="card-title">📋 Registro Paso a Paso de Métodos</h3>
+              <p style="font-size: 0.75rem; color: var(--text-dim); margin-top: 0.2rem;">
+                Haz clic sobre cualquier fila para inspeccionar el desglose de pendientes (<span data-katex="k_i"></span>) de ese paso.
+              </p>
+            </div>
             <span style="font-size: 0.75rem; color: var(--text-dim);" id="tableTotalSteps">0 pasos calculados</span>
           </div>
           <div class="table-responsive">
@@ -198,6 +307,7 @@
                   <th class="col-err">Error Heun</th>
                   <th class="col-rk4">RK4 y(t)</th>
                   <th class="col-err">Error RK4</th>
+                  <th>Inspección</th>
                 </tr>
               </thead>
               <tbody id="tablaBody">
@@ -219,6 +329,19 @@
         </div>
       </section>
     </main>
+  </div>
+
+  <!-- Modal Inspector de Paso -->
+  <div class="modal-overlay" id="modalInspector">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modalInspectorTitulo">🔍 Detalle del Paso Numérico</h3>
+        <button type="button" class="btn-close-modal" id="btnCerrarModal">✕</button>
+      </div>
+      <div id="modalInspectorContenido">
+        <!-- Detalle inyectado dinámicamente -->
+      </div>
+    </div>
   </div>
 
   <!-- Toast Notification -->

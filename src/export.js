@@ -56,3 +56,4 @@ export function exportarCSV(simulacion, nombreArchivo = 'simulacion_edo_albergue
 export function imprimirReporte() {
   window.print();
 }
+
