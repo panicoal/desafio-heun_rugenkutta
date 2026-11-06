@@ -2,51 +2,65 @@ import { PGlite } from '@electric-sql/pglite';
 
 let dbInstance = null;
 let isIndexedDBSupported = true;
+let initPromise = null;
 
 /**
  * Inicializa la base de datos PGlite con almacenamiento IndexedDB.
  * Fallback a memoria si IndexedDB no está disponible (ej. entornos aislados).
  */
 export async function initDB() {
-  if (dbInstance) return dbInstance;
-
-  try {
-    // Intentar con persistencia IndexedDB
-    dbInstance = new PGlite('idb://albergue-edo-db');
-    await dbInstance.waitReady;
-    isIndexedDBSupported = true;
-  } catch (err) {
-    console.warn('No se pudo inicializar IndexedDB para PGlite. Usando memoria:', err);
-    dbInstance = new PGlite();
-    await dbInstance.waitReady;
-    isIndexedDBSupported = false;
+  if (dbInstance) {
+    return {
+      db: dbInstance,
+      isPersisted: isIndexedDBSupported,
+    };
   }
 
-  // Crear la tabla de simulaciones si no existe
-  await dbInstance.query(`
-    CREATE TABLE IF NOT EXISTS simulaciones (
-      id SERIAL PRIMARY KEY,
-      fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-      nombre VARCHAR(120) NOT NULL,
-      y0 REAL NOT NULL,
-      a REAL NOT NULL,
-      b REAL NOT NULL,
-      c REAL NOT NULL,
-      h REAL NOT NULL,
-      t_max REAL NOT NULL,
-      t_cruce REAL,
-      error_max_heun REAL NOT NULL,
-      error_max_rk4 REAL NOT NULL,
-      rmse_heun REAL NOT NULL,
-      rmse_rk4 REAL NOT NULL,
-      json_resultados TEXT NOT NULL
-    );
-  `);
+  if (initPromise) {
+    return initPromise;
+  }
 
-  return {
-    db: dbInstance,
-    isPersisted: isIndexedDBSupported,
-  };
+  initPromise = (async () => {
+    try {
+      // Intentar con persistencia IndexedDB
+      dbInstance = new PGlite('idb://albergue-edo-db');
+      await dbInstance.waitReady;
+      isIndexedDBSupported = true;
+    } catch (err) {
+      console.warn('No se pudo inicializar IndexedDB para PGlite. Usando memoria:', err);
+      dbInstance = new PGlite();
+      await dbInstance.waitReady;
+      isIndexedDBSupported = false;
+    }
+
+    // Crear la tabla de simulaciones si no existe
+    await dbInstance.query(`
+      CREATE TABLE IF NOT EXISTS simulaciones (
+        id SERIAL PRIMARY KEY,
+        fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        nombre VARCHAR(120) NOT NULL,
+        y0 REAL NOT NULL,
+        a REAL NOT NULL,
+        b REAL NOT NULL,
+        c REAL NOT NULL,
+        h REAL NOT NULL,
+        t_max REAL NOT NULL,
+        t_cruce REAL,
+        error_max_heun REAL NOT NULL,
+        error_max_rk4 REAL NOT NULL,
+        rmse_heun REAL NOT NULL,
+        rmse_rk4 REAL NOT NULL,
+        json_resultados TEXT NOT NULL
+      );
+    `);
+
+    return {
+      db: dbInstance,
+      isPersisted: isIndexedDBSupported,
+    };
+  })();
+
+  return initPromise;
 }
 
 /**
@@ -144,4 +158,3 @@ export async function vaciarHistorial() {
   const { db } = await initDB();
   await db.query(`TRUNCATE TABLE simulaciones;`);
 }
-

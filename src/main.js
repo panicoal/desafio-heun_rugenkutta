@@ -597,17 +597,20 @@ async function bootstrap() {
 
   // 10. Inicializar PGlite
   try {
-    const { isPersisted } = await initDB();
-    if (isPersisted) {
-      pgliteStatusText.textContent = 'PGlite (IndexedDB) Activo';
-    } else {
-      pgliteStatusText.textContent = 'PGlite (Memoria) Activo';
+    const res = await initDB();
+    const isPersisted = res?.isPersisted;
+    if (pgliteStatusText) {
+      pgliteStatusText.textContent = isPersisted ? 'PGlite (IndexedDB) Activo' : 'PGlite (Memoria) Activo';
     }
     await refrescarHistorial();
   } catch (err) {
     console.error('Error al inicializar PGlite:', err);
-    pgliteStatusText.textContent = 'PGlite Error';
-    pgliteStatusBadge.style.borderColor = '#dc2626';
+    if (pgliteStatusText) {
+      pgliteStatusText.textContent = 'PGlite Error';
+    }
+    if (pgliteStatusBadge) {
+      pgliteStatusBadge.style.borderColor = '#dc2626';
+    }
   }
 
   // 11. Simulación inicial automática
