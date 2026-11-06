@@ -14,9 +14,15 @@ import { exportarCSV, imprimirReporte } from './export.js';
 
 // Estado global de la aplicación
 let simActual = null;
-let tabActiva = 'poblacion'; // 'poblacion' | 'error' | 'comparativa'
+let tabGraficoActiva = 'poblacion'; // 'poblacion' | 'error' | 'comparativa'
 
-// Elementos DOM
+// Elementos DOM - Navegación Principal
+const navBtnCalculo = document.getElementById('navBtnCalculo');
+const navBtnConcepto = document.getElementById('navBtnConcepto');
+const viewCalculo = document.getElementById('viewCalculo');
+const viewConcepto = document.getElementById('viewConcepto');
+
+// Elementos DOM - Formulario y Parámetros
 const form = document.getElementById('edoForm');
 const rangeY0 = document.getElementById('rangeY0');
 const inputY0 = document.getElementById('inputY0');
@@ -38,7 +44,8 @@ const rangeT = document.getElementById('rangeT');
 const inputT = document.getElementById('inputT');
 const valT = document.getElementById('valT');
 
-const selectH = document.getElementById('selectH');
+const rangeH = document.getElementById('rangeH');
+const inputH = document.getElementById('inputH');
 const valH = document.getElementById('valH');
 
 // Diagnóstico
@@ -94,12 +101,6 @@ const modalInspectorTitulo = document.getElementById('modalInspectorTitulo');
 const modalInspectorContenido = document.getElementById('modalInspectorContenido');
 const btnCerrarModal = document.getElementById('btnCerrarModal');
 
-// Sección Teórica
-const btnToggleTeoria = document.getElementById('btnToggleTeoria');
-const theoryContent = document.getElementById('theoryContent');
-const theoryToggleIcon = document.getElementById('theoryToggleIcon');
-const btnVerTeoriaTop = document.getElementById('btnVerTeoriaTop');
-
 // Toast
 const appToast = document.getElementById('appToast');
 const toastIcon = document.getElementById('toastIcon');
@@ -118,7 +119,7 @@ function showToast(mensaje, icon = 'ℹ️') {
 }
 
 /**
- * Sincroniza slider y campo numérico
+ * Sincroniza slider y campo numérico en ambas direcciones
  */
 function bindRangeAndInput(range, input, display, callback) {
   const sync = (val) => {
@@ -133,16 +134,17 @@ function bindRangeAndInput(range, input, display, callback) {
 }
 
 /**
- * Obtiene parámetros actuales del formulario
+ * Obtiene parámetros actuales del formulario con validaciones básicas
  */
 function obtenerParametros() {
+  const hVal = Math.max(0.001, parseFloat(inputH.value) || 0.5);
   return {
     y0: parseFloat(inputY0.value),
     a: parseFloat(inputA.value),
     b: parseFloat(inputB.value),
     C: parseFloat(inputC.value),
     T: parseFloat(inputT.value),
-    h: parseFloat(selectH.value)
+    h: hVal
   };
 }
 
@@ -170,7 +172,8 @@ function aplicarParametros({ y0, a, b, C, T, h }) {
   rangeT.value = T;
   valT.textContent = T;
 
-  selectH.value = h.toString();
+  inputH.value = h;
+  rangeH.value = h;
   valH.textContent = h;
 }
 
@@ -180,13 +183,13 @@ function aplicarParametros({ y0, a, b, C, T, h }) {
 function actualizarGrafica() {
   if (!simActual) return;
 
-  if (tabActiva === 'poblacion') {
+  if (tabGraficoActiva === 'poblacion') {
     errorScaleToggle.style.display = 'none';
     renderGraficoPoblacion(chartCanvas, simActual);
-  } else if (tabActiva === 'error') {
+  } else if (tabGraficoActiva === 'error') {
     errorScaleToggle.style.display = 'flex';
     renderGraficoError(chartCanvas, simActual, checkEscalaLog.checked);
-  } else if (tabActiva === 'comparativa') {
+  } else if (tabGraficoActiva === 'comparativa') {
     errorScaleToggle.style.display = 'none';
     renderGraficoComparativa(chartCanvas, simActual);
   }
@@ -199,9 +202,9 @@ function actualizarDiagnostico(diag) {
   cardDiagnostico.style.borderLeftColor = diag.color;
   diagTitulo.innerHTML = `<span>🩺</span> ${diag.titulo}`;
   diagBadge.textContent = diag.badge;
-  diagBadge.style.backgroundColor = `${diag.color}22`;
+  diagBadge.style.backgroundColor = `${diag.color}18`;
   diagBadge.style.color = diag.color;
-  diagBadge.style.border = `1px solid ${diag.color}44`;
+  diagBadge.style.border = `1px solid ${diag.color}33`;
 
   diagResumen.innerHTML = `<strong>${diag.resumen}</strong>`;
   diagDetalle.textContent = diag.detalle;
@@ -274,12 +277,12 @@ function abrirInspectorPaso(pasoIdx) {
     const h = paso.infoHeun;
     contenido += `
       <div class="step-calc-box">
-        <div class="step-calc-title" style="color: #10b981;">⚡ Método de Heun (RK2 - Predictor Corrector):</div>
+        <div class="step-calc-title" style="color: #059669;">⚡ Método de Heun (RK2 - Predictor Corrector):</div>
         <div>1. Pendiente inicial: <code>k₁ = f(${paso.t}, ${paso.heun.toFixed(4)}) = ${h.k1.toFixed(5)}</code></div>
         <div>2. Predictor Euler: <code>y~_${paso.paso + 1} = ${paso.heun.toFixed(4)} + ${params.h}·(${h.k1.toFixed(5)}) = ${h.yPred.toFixed(5)}</code></div>
         <div>3. Pendiente final: <code>k₂ = f(${Number((paso.t + params.h).toFixed(4))}, ${h.yPred.toFixed(4)}) = ${h.k2.toFixed(5)}</code></div>
         <div>4. Corrector: <code>y_${paso.paso + 1} = ${paso.heun.toFixed(4)} + (${params.h}/2)·(${h.k1.toFixed(4)} + ${h.k2.toFixed(4)}) = ${h.ySiguiente.toFixed(6)}</code></div>
-        <div style="margin-top: 0.35rem; color: #f87171;">• Error Absoluto Heun: <code>${paso.errorHeun.toExponential(4)}</code> (Relativo: ${paso.relErrorHeun.toFixed(3)}%)</div>
+        <div style="margin-top: 0.35rem; color: #dc2626;">• Error Absoluto Heun: <code>${paso.errorHeun.toExponential(4)}</code> (Relativo: ${paso.relErrorHeun.toFixed(3)}%)</div>
       </div>
     `;
   }
@@ -288,13 +291,13 @@ function abrirInspectorPaso(pasoIdx) {
     const r = paso.infoRK4;
     contenido += `
       <div class="step-calc-box">
-        <div class="step-calc-title" style="color: #c084fc;">🚀 Runge-Kutta de 4to Orden (RK4):</div>
+        <div class="step-calc-title" style="color: #7c3aed;">🚀 Runge-Kutta de 4to Orden (RK4):</div>
         <div>1. <code>k₁ = f(t_n, y_n) = ${r.k1.toFixed(5)}</code></div>
         <div>2. <code>k₂ = f(t_n + h/2, y_n + h/2·k₁) = ${r.k2.toFixed(5)}</code></div>
         <div>3. <code>k₃ = f(t_n + h/2, y_n + h/2·k₂) = ${r.k3.toFixed(5)}</code></div>
         <div>4. <code>k₄ = f(t_n + h, y_n + h·k₃) = ${r.k4.toFixed(5)}</code></div>
         <div>5. Promedio RK4: <code>y_${paso.paso + 1} = y_n + (h/6)·(k₁ + 2k₂ + 2k₃ + k₄) = ${r.ySiguiente.toFixed(6)}</code></div>
-        <div style="margin-top: 0.35rem; color: #f87171;">• Error Absoluto RK4: <code>${paso.errorRK4.toExponential(4)}</code> (Relativo: ${paso.relErrorRK4.toFixed(5)}%)</div>
+        <div style="margin-top: 0.35rem; color: #dc2626;">• Error Absoluto RK4: <code>${paso.errorRK4.toExponential(4)}</code> (Relativo: ${paso.relErrorRK4.toFixed(5)}%)</div>
       </div>
     `;
   }
@@ -302,7 +305,7 @@ function abrirInspectorPaso(pasoIdx) {
   if (paso.errorRK4 > 0) {
     const factorPaso = paso.errorHeun / paso.errorRK4;
     contenido += `
-      <div style="font-size: 0.8rem; color: #38bdf8; background: rgba(56, 189, 248, 0.1); padding: 0.6rem; border-radius: 6px;">
+      <div style="font-size: 0.8rem; color: #0284c7; background: #e0f2fe; padding: 0.6rem; border-radius: 6px; border: 1px solid #bae6fd;">
         💡 En este paso, RK4 es <strong>${factorPaso < 1e5 ? factorPaso.toFixed(1) : factorPaso.toExponential(1)} veces más exacto</strong> que Heun debido a su orden de convergencia O(h⁴).
       </div>
     `;
@@ -323,13 +326,13 @@ function actualizarKPIs(sim) {
 
   if (tCruce !== null && tCruce <= parametros.T) {
     kpiTiempoCruce.textContent = `t = ${tCruce.toFixed(2)} meses`;
-    kpiEstadoCruce.innerHTML = `<span style="color: #ef4444; font-weight: 600;">⚠️ Capacidad (${parametros.C}) superada</span>`;
+    kpiEstadoCruce.innerHTML = `<span style="color: #dc2626; font-weight: 700;">⚠️ Capacidad (${parametros.C}) superada</span>`;
   } else if (tCruce !== null) {
     kpiTiempoCruce.textContent = `t = ${tCruce.toFixed(2)} meses`;
-    kpiEstadoCruce.innerHTML = `<span style="color: #f59e0b;">Seguro en T=${parametros.T} (supera en t>${tCruce.toFixed(1)})</span>`;
+    kpiEstadoCruce.innerHTML = `<span style="color: #d97706; font-weight: 600;">Seguro en T=${parametros.T} (supera en t>${tCruce.toFixed(1)})</span>`;
   } else {
     kpiTiempoCruce.textContent = 'No cruza';
-    kpiEstadoCruce.innerHTML = `<span style="color: #10b981;">✅ Por debajo del límite</span>`;
+    kpiEstadoCruce.innerHTML = `<span style="color: #059669; font-weight: 600;">✅ Por debajo del límite</span>`;
   }
 
   kpiErrorHeun.textContent = errorMaxHeun.toExponential(3);
@@ -360,7 +363,7 @@ async function refrescarHistorial() {
     const list = await listarSimulaciones();
     if (list.length === 0) {
       historialList.innerHTML = `
-        <div style="font-size: 0.825rem; color: var(--text-dim); padding: 0.75rem 0; text-align: center;">
+        <div style="font-size: 0.825rem; color: #64748b; padding: 0.75rem 0; text-align: center;">
           No hay simulaciones guardadas aún. Haz clic en "Guardar en PGlite" para persistir el escenario actual.
         </div>
       `;
@@ -379,7 +382,7 @@ async function refrescarHistorial() {
           <div class="history-meta-sub">
             y₀=${item.y0}, a=${item.a}, b=${item.b}, C=${item.c}, h=${item.h} | Err RK4: ${Number(item.error_max_rk4).toExponential(2)}
           </div>
-          <div style="font-size: 0.7rem; color: var(--text-dim); margin-top: 0.15rem;">${fechaStr}</div>
+          <div style="font-size: 0.7rem; color: #64748b; margin-top: 0.15rem;">${fechaStr}</div>
         </div>
         <div class="history-actions">
           <button class="btn btn-secondary" style="padding: 0.3rem 0.6rem; font-size: 0.75rem;" data-action="cargar" data-id="${item.id}">
@@ -394,23 +397,7 @@ async function refrescarHistorial() {
     });
   } catch (err) {
     console.error('Error al consultar historial PGlite:', err);
-    historialList.innerHTML = `<div style="color: #ef4444; font-size: 0.8rem;">Error al cargar historial: ${err.message}</div>`;
-  }
-}
-
-/**
- * Alterna el acordeón del Marco Teórico
- */
-function toggleTeoria(abrir = null) {
-  const estaAbierto = theoryContent.classList.contains('open');
-  const forzar = abrir !== null ? abrir : !estaAbierto;
-
-  if (forzar) {
-    theoryContent.classList.add('open');
-    theoryToggleIcon.textContent = '▲ Plegar';
-  } else {
-    theoryContent.classList.remove('open');
-    theoryToggleIcon.textContent = '▼ Desplegar';
+    historialList.innerHTML = `<div style="color: #dc2626; font-size: 0.8rem;">Error al cargar historial: ${err.message}</div>`;
   }
 }
 
@@ -418,20 +405,54 @@ function toggleTeoria(abrir = null) {
  * Inicialización de la aplicación
  */
 async function bootstrap() {
-  // Renderizar fórmulas LaTeX en UI
+  // 1. Renderizar fórmulas LaTeX
   renderAllMath();
 
-  // 1. Conectar inputs sincronizados
+  // 2. Navegación Principal por Pestañas (Cálculo vs Concepto)
+  navBtnCalculo.addEventListener('click', () => {
+    navBtnCalculo.classList.add('active');
+    navBtnConcepto.classList.remove('active');
+    viewCalculo.classList.add('active');
+    viewConcepto.classList.remove('active');
+    // Forzar redibujado de gráfica al volver a cálculo si es necesario
+    if (simActual) actualizarGrafica();
+  });
+
+  navBtnConcepto.addEventListener('click', () => {
+    navBtnConcepto.classList.add('active');
+    navBtnCalculo.classList.remove('active');
+    viewConcepto.classList.add('active');
+    viewCalculo.classList.remove('active');
+    // Asegurar render de fórmulas en vista conceptual
+    setTimeout(renderAllMath, 50);
+  });
+
+  // 3. Subpestañas en el Marco Conceptual
+  const conceptSubtabs = document.querySelectorAll('.concept-subtab-btn');
+  const conceptPanes = document.querySelectorAll('.concept-tab-pane');
+
+  conceptSubtabs.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const targetId = btn.getAttribute('data-concept-tab');
+      conceptSubtabs.forEach(b => b.classList.remove('active'));
+      conceptPanes.forEach(p => p.classList.remove('active'));
+
+      btn.classList.add('active');
+      const targetPane = document.getElementById(targetId);
+      if (targetPane) {
+        targetPane.classList.add('active');
+        setTimeout(renderAllMath, 50);
+      }
+    });
+  });
+
+  // 4. Conectar inputs sincronizados (incluyendo h libremente modificable)
   bindRangeAndInput(rangeY0, inputY0, valY0, ejecutarSimulacion);
   bindRangeAndInput(rangeA, inputA, valA, ejecutarSimulacion);
   bindRangeAndInput(rangeB, inputB, valB, ejecutarSimulacion);
   bindRangeAndInput(rangeC, inputC, valC, ejecutarSimulacion);
   bindRangeAndInput(rangeT, inputT, valT, ejecutarSimulacion);
-
-  selectH.addEventListener('change', (e) => {
-    valH.textContent = e.target.value;
-    ejecutarSimulacion();
-  });
+  bindRangeAndInput(rangeH, inputH, valH, ejecutarSimulacion);
 
   form.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -439,9 +460,9 @@ async function bootstrap() {
     showToast('Simulación ejecutada con éxito', '⚡');
   });
 
-  // 2. Configurar pestañas de gráfico
+  // 5. Configurar pestañas del gráfico
   tabPoblacion.addEventListener('click', () => {
-    tabActiva = 'poblacion';
+    tabGraficoActiva = 'poblacion';
     tabPoblacion.classList.add('active');
     tabError.classList.remove('active');
     tabComparativa.classList.remove('active');
@@ -449,7 +470,7 @@ async function bootstrap() {
   });
 
   tabError.addEventListener('click', () => {
-    tabActiva = 'error';
+    tabGraficoActiva = 'error';
     tabError.classList.add('active');
     tabPoblacion.classList.remove('active');
     tabComparativa.classList.remove('active');
@@ -457,7 +478,7 @@ async function bootstrap() {
   });
 
   tabComparativa.addEventListener('click', () => {
-    tabActiva = 'comparativa';
+    tabGraficoActiva = 'comparativa';
     tabComparativa.classList.add('active');
     tabPoblacion.classList.remove('active');
     tabError.classList.remove('active');
@@ -465,12 +486,12 @@ async function bootstrap() {
   });
 
   checkEscalaLog.addEventListener('change', () => {
-    if (tabActiva === 'error') {
+    if (tabGraficoActiva === 'error') {
       actualizarGrafica();
     }
   });
 
-  // 3. Presets
+  // 6. Presets
   const presets = [
     { btn: presetBase, params: { y0: 40, a: 20, b: 0.25, C: 60, T: 12, h: 0.5 } },
     { btn: presetSaturacion, params: { y0: 20, a: 35, b: 0.2, C: 60, T: 12, h: 0.5 } },
@@ -488,7 +509,7 @@ async function bootstrap() {
     });
   });
 
-  // 4. Modal Inspector de Pasos
+  // 7. Modal Inspector de Pasos
   tablaBody.addEventListener('click', (e) => {
     const tr = e.target.closest('tr');
     if (!tr) return;
@@ -508,14 +529,7 @@ async function bootstrap() {
     }
   });
 
-  // 5. Marco Teórico Acordeón
-  btnToggleTeoria.addEventListener('click', () => toggleTeoria());
-  btnVerTeoriaTop.addEventListener('click', () => {
-    toggleTeoria(true);
-    document.getElementById('teoriaSection').scrollIntoView({ behavior: 'smooth' });
-  });
-
-  // 6. Exportaciones
+  // 8. Exportaciones
   btnExportarCSV.addEventListener('click', () => {
     if (!simActual) return;
     const nombre = `simulacion_edo_y0-${simActual.parametros.y0}_a-${simActual.parametros.a}_h-${simActual.parametros.h}.csv`;
@@ -527,7 +541,7 @@ async function bootstrap() {
     imprimirReporte();
   });
 
-  // 7. Historial PGlite: Acciones
+  // 9. Historial PGlite: Acciones
   btnGuardar.addEventListener('click', async () => {
     if (!simActual) return;
     try {
@@ -581,7 +595,7 @@ async function bootstrap() {
     }
   });
 
-  // 8. Inicializar PGlite
+  // 10. Inicializar PGlite
   try {
     const { isPersisted } = await initDB();
     if (isPersisted) {
@@ -593,10 +607,10 @@ async function bootstrap() {
   } catch (err) {
     console.error('Error al inicializar PGlite:', err);
     pgliteStatusText.textContent = 'PGlite Error';
-    pgliteStatusBadge.style.borderColor = '#ef4444';
+    pgliteStatusBadge.style.borderColor = '#dc2626';
   }
 
-  // 9. Simulación inicial automática
+  // 11. Simulación inicial automática
   ejecutarSimulacion();
 }
 

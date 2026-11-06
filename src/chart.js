@@ -65,7 +65,7 @@ export function renderGraficoPoblacion(canvasEl, datosSimulacion) {
         {
           label: `Límite Físico: Capacidad C = ${parametros.C}`,
           data: dataCapacidad,
-          borderColor: '#ef4444',
+          borderColor: '#dc2626',
           borderWidth: 2,
           borderDash: [6, 6],
           pointRadius: 0,
@@ -76,8 +76,8 @@ export function renderGraficoPoblacion(canvasEl, datosSimulacion) {
         {
           label: 'Solución Exacta (Analítica)',
           data: dataAnalitica,
-          borderColor: '#38bdf8',
-          backgroundColor: 'rgba(56, 189, 248, 0.1)',
+          borderColor: '#0284c7',
+          backgroundColor: 'rgba(2, 132, 199, 0.08)',
           borderWidth: 2.5,
           pointRadius: 0,
           fill: true,
@@ -87,11 +87,11 @@ export function renderGraficoPoblacion(canvasEl, datosSimulacion) {
         {
           label: 'Método de Heun (RK2 - O(h²))',
           data: dataHeun,
-          borderColor: '#10b981',
+          borderColor: '#059669',
           borderWidth: 2,
           pointRadius: pasos.length > 50 ? 2 : 4,
           pointHoverRadius: 6,
-          backgroundColor: '#10b981',
+          backgroundColor: '#059669',
           fill: false,
           tension: 0,
           order: 3
@@ -99,12 +99,12 @@ export function renderGraficoPoblacion(canvasEl, datosSimulacion) {
         {
           label: 'Runge-Kutta 4to Orden (RK4 - O(h⁴))',
           data: dataRK4,
-          borderColor: '#c084fc',
+          borderColor: '#7c3aed',
           borderWidth: 2,
           borderDash: [4, 4],
           pointRadius: pasos.length > 50 ? 2 : 4,
           pointHoverRadius: 6,
-          backgroundColor: '#c084fc',
+          backgroundColor: '#7c3aed',
           fill: false,
           tension: 0,
           order: 4
@@ -124,16 +124,17 @@ export function renderGraficoPoblacion(canvasEl, datosSimulacion) {
           labels: {
             boxWidth: 14,
             usePointStyle: true,
-            color: '#e2e8f0',
-            font: { family: 'system-ui', size: 12, weight: '500' }
+            color: '#1e293b',
+            font: { family: 'system-ui', size: 12, weight: '600' }
           }
         },
         tooltip: {
-          backgroundColor: '#0f172a',
-          titleColor: '#f8fafc',
-          bodyColor: '#e2e8f0',
-          borderColor: '#334155',
+          backgroundColor: '#ffffff',
+          titleColor: '#0f172a',
+          bodyColor: '#334155',
+          borderColor: '#e2e8f0',
           borderWidth: 1,
+          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
           padding: 10,
           callbacks: {
             title: (items) => `Tiempo t = ${items[0].label} meses`,
@@ -149,21 +150,21 @@ export function renderGraficoPoblacion(canvasEl, datosSimulacion) {
           title: {
             display: true,
             text: 'Tiempo t (meses)',
-            color: '#94a3b8',
+            color: '#334155',
             font: { weight: 'bold' }
           },
-          ticks: { color: '#94a3b8' },
-          grid: { color: 'rgba(255, 255, 255, 0.05)' }
+          ticks: { color: '#64748b' },
+          grid: { color: 'rgba(0, 0, 0, 0.05)' }
         },
         y: {
           title: {
             display: true,
             text: 'Población de Mascotas y(t)',
-            color: '#94a3b8',
+            color: '#334155',
             font: { weight: 'bold' }
           },
-          ticks: { color: '#94a3b8' },
-          grid: { color: 'rgba(255, 255, 255, 0.05)' },
+          ticks: { color: '#64748b' },
+          grid: { color: 'rgba(0, 0, 0, 0.05)' },
           suggestedMin: Math.max(0, Math.floor(Math.min(...dataAnalitica) * 0.9)),
           suggestedMax: Math.ceil(Math.max(...dataAnalitica, parametros.C) * 1.08)
         }
@@ -192,8 +193,8 @@ export function renderGraficoError(canvasEl, datosSimulacion, escalaLog = false)
         {
           label: 'Error Absoluto Heun (|y_exacta - y_heun|)',
           data: dataErrHeun,
-          borderColor: '#10b981',
-          backgroundColor: 'rgba(16, 185, 129, 0.1)',
+          borderColor: '#059669',
+          backgroundColor: 'rgba(5, 150, 105, 0.1)',
           borderWidth: 2,
           pointRadius: pasos.length > 50 ? 1 : 3,
           fill: true
@@ -201,8 +202,8 @@ export function renderGraficoError(canvasEl, datosSimulacion, escalaLog = false)
         {
           label: 'Error Absoluto RK4 (|y_exacta - y_rk4|)',
           data: dataErrRK4,
-          borderColor: '#c084fc',
-          backgroundColor: 'rgba(192, 132, 252, 0.1)',
+          borderColor: '#7c3aed',
+          backgroundColor: 'rgba(124, 58, 237, 0.1)',
           borderWidth: 2,
           pointRadius: pasos.length > 50 ? 1 : 3,
           fill: true
@@ -222,16 +223,17 @@ export function renderGraficoError(canvasEl, datosSimulacion, escalaLog = false)
           labels: {
             boxWidth: 14,
             usePointStyle: true,
-            color: '#e2e8f0',
-            font: { family: 'system-ui', size: 12, weight: '500' }
+            color: '#1e293b',
+            font: { family: 'system-ui', size: 12, weight: '600' }
           }
         },
         tooltip: {
-          backgroundColor: '#0f172a',
-          titleColor: '#f8fafc',
-          bodyColor: '#e2e8f0',
-          borderColor: '#334155',
+          backgroundColor: '#ffffff',
+          titleColor: '#0f172a',
+          bodyColor: '#334155',
+          borderColor: '#e2e8f0',
           borderWidth: 1,
+          padding: 10,
           callbacks: {
             title: (items) => `Tiempo t = ${items[0].label} meses`,
             label: (context) => {
@@ -246,25 +248,25 @@ export function renderGraficoError(canvasEl, datosSimulacion, escalaLog = false)
           title: {
             display: true,
             text: 'Tiempo t (meses)',
-            color: '#94a3b8',
+            color: '#334155',
             font: { weight: 'bold' }
           },
-          ticks: { color: '#94a3b8' },
-          grid: { color: 'rgba(255, 255, 255, 0.05)' }
+          ticks: { color: '#64748b' },
+          grid: { color: 'rgba(0, 0, 0, 0.05)' }
         },
         y: {
           type: escalaLog ? 'logarithmic' : 'linear',
           title: {
             display: true,
             text: escalaLog ? 'Error Absoluto (Escala Logarítmica log₁₀)' : 'Error Absoluto |y - y_num|',
-            color: '#94a3b8',
+            color: '#334155',
             font: { weight: 'bold' }
           },
           ticks: {
-            color: '#94a3b8',
+            color: '#64748b',
             callback: (v) => typeof v === 'number' ? v.toExponential(1) : v
           },
-          grid: { color: 'rgba(255, 255, 255, 0.05)' }
+          grid: { color: 'rgba(0, 0, 0, 0.05)' }
         }
       }
     }
@@ -288,15 +290,15 @@ export function renderGraficoComparativa(canvasEl, datosSimulacion) {
         {
           label: 'Método de Heun (Orden O(h²))',
           data: [errorMaxHeun, rmseHeun],
-          backgroundColor: 'rgba(16, 185, 129, 0.7)',
-          borderColor: '#10b981',
+          backgroundColor: 'rgba(5, 150, 105, 0.75)',
+          borderColor: '#059669',
           borderWidth: 1
         },
         {
           label: 'Runge-Kutta 4to Orden (Orden O(h⁴))',
           data: [errorMaxRK4, rmseRK4],
-          backgroundColor: 'rgba(192, 132, 252, 0.7)',
-          borderColor: '#c084fc',
+          backgroundColor: 'rgba(124, 58, 237, 0.75)',
+          borderColor: '#7c3aed',
           borderWidth: 1
         }
       ]
@@ -308,20 +310,23 @@ export function renderGraficoComparativa(canvasEl, datosSimulacion) {
         legend: {
           position: 'top',
           labels: {
-            color: '#e2e8f0',
-            font: { family: 'system-ui', size: 12, weight: '500' }
+            color: '#1e293b',
+            font: { family: 'system-ui', size: 12, weight: '600' }
           }
         },
         title: {
           display: true,
           text: `Comparativa de Precisión: RK4 es ~${factorMejora < 1e6 ? factorMejora.toFixed(0) : factorMejora.toExponential(1)} veces más exacto`,
-          color: '#f8fafc',
+          color: '#0f172a',
           font: { size: 14, weight: 'bold' }
         },
         tooltip: {
-          backgroundColor: '#0f172a',
-          titleColor: '#f8fafc',
-          bodyColor: '#e2e8f0',
+          backgroundColor: '#ffffff',
+          titleColor: '#0f172a',
+          bodyColor: '#334155',
+          borderColor: '#e2e8f0',
+          borderWidth: 1,
+          padding: 10,
           callbacks: {
             label: (context) => ` ${context.dataset.label}: ${context.parsed.y.toExponential(4)}`
           }
@@ -329,7 +334,7 @@ export function renderGraficoComparativa(canvasEl, datosSimulacion) {
       },
       scales: {
         x: {
-          ticks: { color: '#94a3b8', font: { weight: 'bold' } },
+          ticks: { color: '#334155', font: { weight: 'bold' } },
           grid: { display: false }
         },
         y: {
@@ -337,14 +342,14 @@ export function renderGraficoComparativa(canvasEl, datosSimulacion) {
           title: {
             display: true,
             text: 'Magnitud del Error (Escala Logarítmica)',
-            color: '#94a3b8',
+            color: '#334155',
             font: { weight: 'bold' }
           },
           ticks: {
-            color: '#94a3b8',
+            color: '#64748b',
             callback: (v) => typeof v === 'number' ? v.toExponential(0) : v
           },
-          grid: { color: 'rgba(255, 255, 255, 0.05)' }
+          grid: { color: 'rgba(0, 0, 0, 0.05)' }
         }
       }
     }
