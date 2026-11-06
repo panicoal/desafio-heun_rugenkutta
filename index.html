@@ -18,15 +18,7 @@
           <p class="brand-subtitle">Comparativa Numérica: Heun (RK2) vs Runge-Kutta 4to Orden (RK4) vs Solución Exacta</p>
         </div>
       </div>
-      <div class="header-badges">
-        <div class="badge badge-pglite" id="pgliteStatusBadge">
-          <span class="badge-status-dot"></span>
-          <span id="pgliteStatusText">PGlite (IndexedDB) Activo</span>
-        </div>
-        <div class="badge" style="background-color: #f3e8ff; color: #7e22ce; border: 1px solid #e9d5ff;">
-          <span>Vercel Ready</span>
-        </div>
-      </div>
+      
     </header>
 
     <!-- Barra de Navegación Principal por Pestañas -->
@@ -48,14 +40,14 @@
         <aside class="sidebar-controls">
           <div class="card">
             <div class="card-header">
-              <h2 class="card-title">⚙️ Parámetros del Modelo</h2>
+              <h2 class="card-title">Parámetros del Modelo</h2>
             </div>
 
             <!-- Presets Rápidos -->
             <div class="presets-group">
               <div class="presets-label">Escenarios Rápidos:</div>
               <div class="presets-buttons">
-                <button type="button" class="btn-preset active" id="presetBase" title="y0=40, a=20, b=0.25, C=60, T=12, h=0.5">Caso Base (Doc)</button>
+                <button type="button" class="btn-preset active" id="presetBase" title="y0=40, a=20, b=0.25, C=60, T=12, h=0.5">Caso Base</button>
                 <button type="button" class="btn-preset" id="presetSaturacion" title="y0=20, a=35, b=0.2, C=60, T=12, h=0.5">Saturación Rápida</button>
                 <button type="button" class="btn-preset" id="presetAdopcion" title="y0=55, a=10, b=0.4, C=60, T=12, h=0.5">Alta Adopción</button>
                 <button type="button" class="btn-preset" id="presetPasoFino" title="y0=40, a=20, b=0.25, C=60, T=12, h=0.1">Paso Fino (h=0.1)</button>
@@ -166,7 +158,7 @@
           <div class="diagnostico-card" id="cardDiagnostico">
             <div class="diagnostico-header">
               <h3 class="diagnostico-title" id="diagTitulo">
-                <span>🩺</span> Diagnóstico de Gestión del Albergue
+               Diagnóstico de Gestión del Albergue
               </h3>
               <span class="diagnostico-badge" id="diagBadge" style="background-color: #fee2e2; color: #dc2626;">
                 Evaluando...
@@ -291,16 +283,16 @@
         <!-- Subtabs Conceptuales -->
         <div class="concept-subtabs">
           <button type="button" class="concept-subtab-btn active" data-concept-tab="tabProblematica">
-            🐾 1. Problemática del Albergue
+            1. Problemática del Albergue
           </button>
           <button type="button" class="concept-subtab-btn" data-concept-tab="tabAnalitica">
-            📐 2. Deducción Analítica Exacta
+            2. Deducción Analítica Exacta
           </button>
           <button type="button" class="concept-subtab-btn" data-concept-tab="tabMetodos">
-            🔬 3. Métodos Numéricos (Heun vs RK4)
+            3. Métodos Numéricos (Heun vs RK4)
           </button>
           <button type="button" class="concept-subtab-btn" data-concept-tab="tabArquitectura">
-            💾 4. Arquitectura y Persistencia PGlite
+            4. Arquitectura y Persistencia PGlite
           </button>
         </div>
 

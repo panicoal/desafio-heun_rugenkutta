@@ -200,7 +200,7 @@ function actualizarGrafica() {
  */
 function actualizarDiagnostico(diag) {
   cardDiagnostico.style.borderLeftColor = diag.color;
-  diagTitulo.innerHTML = `<span>🩺</span> ${diag.titulo}`;
+  diagTitulo.innerHTML =  diag.titulo;
   diagBadge.textContent = diag.badge;
   diagBadge.style.backgroundColor = `${diag.color}18`;
   diagBadge.style.color = diag.color;
@@ -266,7 +266,7 @@ function abrirInspectorPaso(pasoIdx) {
 
   let contenido = `
     <div class="step-calc-box">
-      <div class="step-calc-title">📌 Estado al Inicio del Intervalo:</div>
+      <div class="step-calc-title"> Estado al Inicio del Intervalo:</div>
       <div>• Tiempo actual: <code>t_${paso.paso} = ${paso.t}</code> meses</div>
       <div>• Solución Exacta: <code>y(${paso.t}) = ${paso.analitica.toFixed(6)}</code></div>
       <div>• EDO evaluada: <code>f(t, y) = a - b·y = ${params.a} - ${params.b}·y</code></div>

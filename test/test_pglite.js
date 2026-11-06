@@ -41,3 +41,4 @@ testPGlite().catch((err) => {
   console.error('❌ Error en test de PGlite:', err);
   process.exit(1);
 });
+
