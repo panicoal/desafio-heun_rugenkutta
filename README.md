@@ -210,3 +210,4 @@ Sea $f(t, y) = a - by$ la función derivada:
 - **Base de Datos Local:** [PGlite (ElectricSQL)](https://pglite.dev/) (PostgreSQL en WebAssembly con persistencia en IndexedDB)
 - **Renderizado Matemático:** [KaTeX](https://katex.org/) (Tipografía matemática LaTeX de alta velocidad)
 - **Despliegue y CDN:** [Vercel](https://vercel.com/)
+
