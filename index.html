@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Simulador EDO - Albergue de Mascotas (Heun vs RK4)</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐾</text></svg>" />
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="brand-wrapper">
+        <div class="brand-icon">🐾</div>
+        <div>
+          <h1 class="brand-title">Simulador EDO: Albergue de Mascotas</h1>
+          <p class="brand-subtitle">Análisis Numérico: Heun (RK2) vs Runge-Kutta 4to Orden (RK4) vs Solución Exacta</p>
+        </div>
+      </div>
+      <div class="header-badges">
+        <div class="badge badge-pglite" id="pgliteStatusBadge">
+          <span class="badge-status-dot"></span>
+          <span id="pgliteStatusText">PGlite (IndexedDB) Activo</span>
+        </div>
+        <div class="badge" style="background-color: rgba(168, 85, 247, 0.12); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.25);">
+          <span>Vercel Ready</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Grid -->
+    <main class="main-grid">
+      <!-- Columna Izquierda: Parámetros y Controles -->
+      <aside class="sidebar-controls">
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">⚙️ Parámetros del Modelo</h2>
+          </div>
+
+          <!-- Presets -->
+          <div class="presets-group">
+            <div class="presets-label">Escenarios Rápidos:</div>
+            <div class="presets-buttons">
+              <button type="button" class="btn-preset active" id="presetBase">Caso Base (Doc)</button>
+              <button type="button" class="btn-preset" id="presetSaturacion">Saturación Rápida</button>
+              <button type="button" class="btn-preset" id="presetAdopcion">Alta Adopción</button>
+              <button type="button" class="btn-preset" id="presetPasoFino">Paso Fino (h=0.1)</button>
+            </div>
+          </div>
+
+          <form id="edoForm">
+            <!-- y0: Población Inicial -->
+            <div class="form-group">
+              <div class="form-label-row">
+                <label for="inputY0" class="form-label">Población Inicial (y₀):</label>
+                <span class="form-val-display" id="valY0">40</span>
+              </div>
+              <input type="range" id="rangeY0" min="0" max="150" step="1" value="40" class="slider-input" />
+              <input type="number" id="inputY0" min="0" max="500" step="1" value="40" class="form-input" style="margin-top: 0.35rem;" />
+            </div>
+
+            <!-- a: Tasa de Ingreso -->
+            <div class="form-group">
+              <div class="form-label-row">
+                <label for="inputA" class="form-label">Tasa Ingreso (a) [mascotas/mes]:</label>
+                <span class="form-val-display" id="valA">20</span>
+              </div>
+              <input type="range" id="rangeA" min="1" max="100" step="0.5" value="20" class="slider-input" />
+              <input type="number" id="inputA" min="0.1" max="500" step="0.1" value="20" class="form-input" style="margin-top: 0.35rem;" />
+            </div>
+
+            <!-- b: Tasa de Salida -->
+            <div class="form-group">
+              <div class="form-label-row">
+                <label for="inputB" class="form-label">Tasa Salida (b) [mes⁻¹]:</label>
+                <span class="form-val-display" id="valB">0.25</span>
+              </div>
+              <input type="range" id="rangeB" min="0.01" max="1.5" step="0.01" value="0.25" class="slider-input" />
+              <input type="number" id="inputB" min="0.001" max="5" step="0.01" value="0.25" class="form-input" style="margin-top: 0.35rem;" />
+            </div>
+
+            <!-- C: Capacidad Máxima -->
+            <div class="form-group">
+              <div class="form-label-row">
+                <label for="inputC" class="form-label">Capacidad Máxima (C):</label>
+                <span class="form-val-display" id="valC">60</span>
+              </div>
+              <input type="range" id="rangeC" min="10" max="200" step="1" value="60" class="slider-input" />
+              <input type="number" id="inputC" min="1" max="1000" step="1" value="60" class="form-input" style="margin-top: 0.35rem;" />
+            </div>
+
+            <!-- T: Tiempo Total -->
+            <div class="form-group">
+              <div class="form-label-row">
+                <label for="inputT" class="form-label">Tiempo Total (T) [meses]:</label>
+                <span class="form-val-display" id="valT">12</span>
+              </div>
+              <input type="range" id="rangeT" min="1" max="36" step="1" value="12" class="slider-input" />
+              <input type="number" id="inputT" min="1" max="120" step="1" value="12" class="form-input" style="margin-top: 0.35rem;" />
+            </div>
+
+            <!-- h: Paso de Integración -->
+            <div class="form-group">
+              <div class="form-label-row">
+                <label for="inputH" class="form-label">Paso Integración (h):</label>
+                <span class="form-val-display" id="valH">0.5</span>
+              </div>
+              <select id="selectH" class="form-input">
+                <option value="1.0">h = 1.0 (Paso Grueso)</option>
+                <option value="0.5" selected>h = 0.5 (Recomendado)</option>
+                <option value="0.25">h = 0.25 (Alta resolución)</option>
+                <option value="0.1">h = 0.1 (Fina resolución)</option>
+                <option value="0.05">h = 0.05 (Ultra fina)</option>
+              </select>
+            </div>
+
+            <!-- Acciones -->
+            <div class="action-buttons">
+              <button type="submit" class="btn btn-primary" id="btnSimular">
+                <span>⚡</span> Ejecutar Simulación
+              </button>
+              <button type="button" class="btn btn-secondary" id="btnGuardar">
+                <span>💾</span> Guardar en PGlite
+              </button>
+              <button type="button" class="btn btn-secondary" id="btnExportarCSV">
+                <span>📥</span> Descargar CSV
+              </button>
+              <button type="button" class="btn btn-secondary" id="btnImprimir">
+                <span>🖨️</span> Imprimir / Reporte PDF
+              </button>
+            </div>
+          </form>
+        </div>
+      </aside>
+
+      <!-- Columna Derecha: KPIs, Gráficas y Tabla de Resultados -->
+      <section class="content-display">
+        <!-- KPIs -->
+        <div class="kpi-grid">
+          <div class="kpi-card exact">
+            <div class="kpi-label">Población Final Analítica</div>
+            <div class="kpi-value" id="kpiPobFinal">--</div>
+            <div class="kpi-subtitle" id="kpiEquilibrio">Equilibrio a/b: --</div>
+          </div>
+
+          <div class="kpi-card capacity">
+            <div class="kpi-label">Cruce de Capacidad (C)</div>
+            <div class="kpi-value" id="kpiTiempoCruce">--</div>
+            <div class="kpi-subtitle" id="kpiEstadoCruce">Estado: Evaluando</div>
+          </div>
+
+          <div class="kpi-card heun">
+            <div class="kpi-label">Heun (RK2) - Error Máx</div>
+            <div class="kpi-value" id="kpiErrorHeun">--</div>
+            <div class="kpi-subtitle" id="kpiRmseHeun">RMSE: --</div>
+          </div>
+
+          <div class="kpi-card rk4">
+            <div class="kpi-label">RK4 - Error Máx</div>
+            <div class="kpi-value" id="kpiErrorRK4">--</div>
+            <div class="kpi-subtitle" id="kpiRmseRK4">RMSE: --</div>
+          </div>
+        </div>
+
+        <!-- Gráfico -->
+        <div class="card chart-card">
+          <div class="card-header">
+            <div class="chart-tabs">
+              <button type="button" class="tab-btn active" id="tabPoblacion">📈 Curva de Población y(t)</button>
+              <button type="button" class="tab-btn" id="tabError">🎯 Comparativa de Errores E(t)</button>
+            </div>
+            <div class="chart-header-actions" id="errorScaleToggle" style="display: none;">
+              <label style="font-size: 0.75rem; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; gap: 0.35rem;">
+                <input type="checkbox" id="checkEscalaLog" /> Escala Logarítmica
+              </label>
+            </div>
+          </div>
+          <div class="chart-wrapper">
+            <canvas id="chartCanvas"></canvas>
+          </div>
+        </div>
+
+        <!-- Tabla Paso a Paso -->
+        <div class="card table-card">
+          <div class="card-header">
+            <h3 class="card-title">📋 Registro Paso a Paso de Métodos</h3>
+            <span style="font-size: 0.75rem; color: var(--text-dim);" id="tableTotalSteps">0 pasos calculados</span>
+          </div>
+          <div class="table-responsive">
+            <table class="edo-table" id="tablaResultados">
+              <thead>
+                <tr>
+                  <th>Paso</th>
+                  <th>t (meses)</th>
+                  <th class="col-exact">Analítica y(t)</th>
+                  <th class="col-heun">Heun y(t)</th>
+                  <th class="col-err">Error Heun</th>
+                  <th class="col-rk4">RK4 y(t)</th>
+                  <th class="col-err">Error RK4</th>
+                </tr>
+              </thead>
+              <tbody id="tablaBody">
+                <!-- Se inyecta dinámicamente -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Historial PGlite -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">🗄️ Historial Persistente en PGlite (IndexedDB)</h3>
+            <button type="button" class="btn-danger-sm" id="btnVaciarHistorial">Vaciar Base de Datos</button>
+          </div>
+          <div class="history-list" id="historialList">
+            <div style="font-size: 0.825rem; color: var(--text-dim); padding: 0.5rem 0;">Cargando historial de simulaciones...</div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast" id="appToast">
+    <span id="toastIcon">ℹ️</span>
+    <span id="toastMsg">Notificación</span>
+  </div>
+
+  <!-- Script Principal Vite -->
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
